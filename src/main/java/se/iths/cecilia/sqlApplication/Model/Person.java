@@ -3,7 +3,23 @@ package se.iths.cecilia.sqlApplication.Model;
 import java.util.Date;
 
 public class Person {
-    private int person_id;
+    public void setFirst_name(String first_name) {
+        this.first_name = first_name;
+    }
+
+    public void setLast_name(String last_name) {
+        this.last_name = last_name;
+    }
+
+    public void setDob(java.sql.Date dob) {
+        this.dob = dob;
+    }
+
+    public void setIncome(double income) {
+        this.income = income;
+    }
+
+    private Integer person_id;
     private String first_name;
     private String last_name;
     private java.sql.Date dob;
@@ -22,7 +38,6 @@ public class Person {
         this.last_name = personBuilder.last_name;
         this.dob = personBuilder.dob;
         this.income = personBuilder.income;
-
     }
 
     public int getPerson_id() {

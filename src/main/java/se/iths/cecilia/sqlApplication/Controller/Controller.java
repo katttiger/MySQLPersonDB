@@ -23,6 +23,15 @@ public class Controller {
         }
     }
 
+    public void getPersonById(int id) {
+        Person person = personDAO.findById(id);
+        if (person == null) {
+            System.out.println("No person was found with id " + id);
+        } else {
+            System.out.println(person);
+        }
+    }
+
     public void addPerson() {
         Person.PersonBuilder personBuilder = new Person.PersonBuilder();
         Scanner sc = new Scanner(System.in);
@@ -41,4 +50,55 @@ public class Controller {
         personDAO.insertPerson(newPerson);
         System.out.println("Adding person...");
     }
+
+    public void updatePerson() {
+        System.out.println("Enter the ID of the person you want to update: ");
+        Person person = personDAO.findById(new Scanner(System.in).nextInt());
+        System.out.println("Your current values are: " + person);
+        Scanner scanner = new Scanner(System.in);
+        String answer = "0";
+
+        while (!answer.equals("5")) {
+
+            System.out.println("""
+                    [1] First name
+                    [2] Last name
+                    [3] Date of birth
+                    [4] Income
+                    [5] Done
+                    What value do you want to update:
+                    """);
+            answer = scanner.nextLine();
+
+            switch (answer) {
+                case "1" -> {
+                    System.out.println("Enter the new value: ");
+                    person.setFirst_name(scanner.nextLine());
+                }
+                case "2" -> {
+                    System.out.println("Enter the new value: ");
+                    person.setLast_name(scanner.nextLine());
+                }
+                case "3" -> {
+                    System.out.println("Enter the new value: ");
+                    person.setDob(Date.valueOf(scanner.next()));
+                }
+                case "4" -> {
+                    System.out.println("Enter the new value: ");
+                    person.setIncome(scanner.hasNextDouble() ? scanner.nextDouble() : 0);
+                }
+                case "5" -> {
+                    personDAO.updatePerson(person);
+                }
+                default -> System.out.println("Enter a valid number.");
+            }
+        }
+    }
+
+    public void deletePerson() {
+        System.out.println("Enter id of the person you want to delete: ");
+        personDAO.deletePerson(new Scanner(System.in).nextInt());
+
+    }
+
 }

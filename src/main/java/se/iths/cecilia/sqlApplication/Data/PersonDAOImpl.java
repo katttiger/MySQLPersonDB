@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PersonDAOImpl implements PersonDAO {
-
     DbContext dbContext;
     private String sqlQuery = "";
 
@@ -39,27 +38,25 @@ public class PersonDAOImpl implements PersonDAO {
 
     @Override
     public void updatePerson(Person person) {
-        sqlQuery = "UPDATE person WHERE (first_name, last_name, dob, income) VALUES (?, ?, ?, ?)";
+        sqlQuery = "UPDATE person SET first_name=?, last_name=?, dob=?, income=? WHERE person_id=?";
         try (Connection conn = dbContext.getConnection()) {
             PreparedStatement pstmt = conn.prepareStatement(sqlQuery);
+            pstmt.setInt(5, person.getPerson_id());
 
-            try (ResultSet rs = pstmt.executeQuery()) {
-                pstmt.setString(1, person.getFirst_name());
-                pstmt.setString(2, person.getLast_name());
-                pstmt.setDate(3, new java.sql.Date(rs.getDate("dob").getTime()));
-                pstmt.setDouble(4, rs.getDouble("income"));
+            pstmt.setString(1, person.getFirst_name());
+            pstmt.setString(2, person.getLast_name());
+            pstmt.setDate(3, new java.sql.Date(person.getDob().getTime()));
+            pstmt.setDouble(4, person.getIncome());
 
-                int rowsUpdated = pstmt.executeUpdate();
-                if (rowsUpdated > 0) {
-                    System.out.println("Antal rader som har uppdaterats: " + rowsUpdated);
-                } else {
-                    System.out.println("Uppdateringen misslyckades.");
-                }
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
+            int rowsUpdated = pstmt.executeUpdate();
+            if (rowsUpdated > 0) {
+                System.out.println("Antal rader som har uppdaterats: " + rowsUpdated);
+            } else {
+                System.out.println("Uppdateringen misslyckades.");
             }
+
         } catch (SQLException e) {
-            e.getStackTrace();
+            throw new RuntimeException(e);
         }
     }
 
@@ -69,17 +66,14 @@ public class PersonDAOImpl implements PersonDAO {
                 "DELETE FROM person WHERE person_id=?";
         try (Connection conn = dbContext.getConnection()) {
             PreparedStatement pstmt = conn.prepareStatement(sqlQuery);
+            pstmt.setInt(1, id);
 
-            try (ResultSet rs = pstmt.executeQuery()) {
-                pstmt.setInt(1, id);
-                int rowsDeleted = pstmt.executeUpdate();
-                if (rowsDeleted > 0) {
-                    System.out.println("Antal rader som har tagits bort: " + rowsDeleted);
-                } else {
-                    System.out.println("Inga rader matchade.");
-                }
+            int rowsDeleted = pstmt.executeUpdate();
+            if (rowsDeleted > 0) {
+                System.out.println("Antal rader som har tagits bort: " + rowsDeleted);
+            } else {
+                System.out.println("Inga rader matchade.");
             }
-
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -114,6 +108,30 @@ public class PersonDAOImpl implements PersonDAO {
 
     @Override
     public Person findById(int id) {
+        sqlQuery = "SELECT * FROM person WHERE person_id = ?";
+        try (Connection conn = dbContext.getConnection()) {
+            PreparedStatement pstmt = conn.prepareStatement(sqlQuery);
+            pstmt.setInt(1, id);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    if (rs.getInt("person_id") == id) {
+                        Person.PersonBuilder personBuilder = new Person.PersonBuilder();
+                        personBuilder.setPerson_id(rs.getInt("person_id"));
+                        personBuilder.setFirst_name(rs.getString("first_name"));
+                        personBuilder.setLast_name(rs.getString("last_name"));
+                        personBuilder.setDob(rs.getDate("dob"));
+                        personBuilder.setIncome(rs.getDouble("income"));
+                        return new Person(personBuilder, id);
+                    }
+                }
+            } catch (Exception e) {
+                e.getMessage();
+            }
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
         return null;
     }
 }
