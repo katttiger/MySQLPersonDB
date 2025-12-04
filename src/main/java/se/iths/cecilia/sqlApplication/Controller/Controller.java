@@ -23,7 +23,10 @@ public class Controller {
         }
     }
 
-    public void getPersonById(int id) {
+    public void getPersonById() {
+        Scanner sc = new Scanner(System.in);
+        System.out.println("Enter ID: ");
+        int id = sc.hasNextInt() ? sc.nextInt() : -1;
         Person person = personDAO.findById(id);
         if (person == null) {
             System.out.println("No person was found with id " + id);
